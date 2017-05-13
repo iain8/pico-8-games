@@ -1,17 +1,15 @@
 pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
--- game
 score=0
 lives=3
+message=''
 
--- paddle
 padx=52
 pady=122
 padwidth=24
 padheight=4
 
--- ball
 ballx=64
 bally=64
 ballsize=3
@@ -67,6 +65,7 @@ function ballfail()
       if score>10 then score-=10 else score=0 end
       lives-=1
     else
+      message='you failed to ball'
       ballydir=0
       ballxdir=0
       bally=64
@@ -85,6 +84,8 @@ end
 function _draw()
   -- clear screen
   rectfill(0,0,128,128,3)
+
+  print(message,32,32,15)
   
   -- draw paddle
   rectfill(padx,pady,padx+padwidth,pady+padheight,15)
