@@ -12,11 +12,19 @@ padheight=4
 
 ballx=64
 bally=64
-balldy=0
+balldy=1
 ballsize=3
 ballxdir=3
 ballydir=-1 -- -1 = down, +1 = up
 ballacc=0.005
+
+function _init()
+  ballx=rnd(64) + ballsize
+  bally=rnd(64) + ballsize
+
+  if rnd(1)>=0.5 then ballxdir=-ballxdir end
+  if rnd(1)>=0.5 then ballydir=-ballydir end
+end
 
 function movepaddle()
   if btn(0) and padx>=0 then
