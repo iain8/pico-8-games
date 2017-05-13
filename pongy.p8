@@ -12,9 +12,11 @@ padheight=4
 
 ballx=64
 bally=64
+balldy=0
 ballsize=3
 ballxdir=3
-ballydir=-1
+ballydir=-1 -- -1 = down, +1 = up
+ballacc=0.005
 
 function movepaddle()
   if btn(0) and padx>=0 then
@@ -26,7 +28,14 @@ end
 
 function moveball()
   ballx += ballxdir
-  bally += ballydir
+
+  balldy+=ballacc
+  
+  if ballydir==1 then
+    bally+=balldy
+  else
+    bally-=balldy
+  end
 end
 
 function bounceball()
@@ -59,6 +68,8 @@ end
 
 function ballfail()
   if bally>128 then
+    balldy=0
+
     if lives>0 then
       sfx(2)
       bally=24
