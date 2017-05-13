@@ -22,6 +22,8 @@ function _init()
   ballx=rnd(64) + ballsize
   bally=rnd(64) + ballsize
 
+  ballxdir=rnd(3) + 2
+
   if rnd(1)>=0.5 then ballxdir=-ballxdir end
   if rnd(1)>=0.5 then ballydir=-ballydir end
 end
@@ -93,11 +95,13 @@ function ballfail()
 end
 
 function _update()
-  movepaddle()
-  bounceball()
-  bouncepaddle()
-  moveball()
-  ballfail()
+  if message=='' then
+    movepaddle()
+    bounceball()
+    bouncepaddle()
+    moveball()
+    ballfail()
+  end
 end
 
 function _draw()
