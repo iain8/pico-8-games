@@ -64,7 +64,7 @@ function ballfail()
     if lives>0 then
       sfx(2)
       bally=24
-      score-=10
+      if score>10 then score-=10 else score=0 end
       lives-=1
     else
       ballydir=0
