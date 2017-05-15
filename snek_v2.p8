@@ -4,6 +4,7 @@ __lua__
 body = {}
 bodylength = 0
 unitsize = 2
+direction = 3
 
 function _init()
   for i = 1, 5 do
@@ -14,6 +15,7 @@ function _init()
 end
 
 function _update()
+  getdirection()
   move()
 end
 
@@ -29,20 +31,26 @@ function _draw()
   print(body[1][2], 12, 6, 15)
 end
 
+function getdirection()
+  if btn(0) and direction != 1 then direction = 0
+  elseif btn(1) and direction != 0 then direction = 1
+  elseif btn(2) and direction != 3 then direction = 2
+  elseif btn(3) and direction != 2 then direction = 3
+  end
+end
+
 function move()
   next = body[1]
 
-  if btn(0) then
+  if direction == 0 then
     next = {next[1] - 1, next[2]}
-  elseif btn(1) then
-  next = {next[1] + 1, next[2]}
-  elseif btn(2) then
+  elseif direction == 1 then
+    next = {next[1] + 1, next[2]}
+  elseif direction == 2 then
     next = {next[1], next[2] - 1}
-  elseif btn(3) then
+  elseif direction == 3 then
     next = {next[1], next[2] + 1}
   end
-
-  printh(next[1])
 
   newbody={}
 
