@@ -6,11 +6,14 @@ bodylength = 0
 unitsize = 2
 direction = 3
 speed = 0.25
-framecount=0
+framecount = 0
+score = 0
+food = {}
+foodlength = 0
 
 function _init()
   for i = 1, 5 do
-    add(body, {5, 2 + i})
+    add(body, {6, 2 + (i * unitsize)})
 
     bodylength += 1
   end
@@ -19,7 +22,11 @@ end
 function _update()
   getdirection()
 
-  if framecount % 4 == 0 then
+  if foodlength == 0 then
+    addfood()
+  end
+
+  if framecount % 5 == 0 then
     move()
   end
 
@@ -37,7 +44,14 @@ function _draw()
     rectfill(x, y, x + unitsize, y + unitsize, colour)
   end
 
-  print(body[1][2], 12, 6, 15)
+  for tasty in all(food) do
+    x = tasty[1] * unitsize
+    y = tasty[2] * unitsize
+    rectfill(x, y, x + unitsize, y + unitsize, 8)
+  end
+
+  print(body[1][1], 12, 6, 10)
+  print(body[1][2], 22, 6, 10)
 end
 
 function getdirection()
@@ -84,6 +98,13 @@ function wrap(segment)
   end
 
   return segment
+end
+
+function addfood()
+  -- food[1] = {64, 64}
+  add(food, {32, 32})
+
+  foodlength += 1
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
