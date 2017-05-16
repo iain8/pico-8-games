@@ -25,7 +25,7 @@ function _update()
   getdirection()
 
   if foodlength == 0 then
-    -- addfood()
+    addfood()
   end
 
   if framecount % 5 == 0 then
@@ -124,7 +124,12 @@ function wrap(segment)
 end
 
 function addfood()
-  add(food, {32, 32})
+  -- TODO: prevent food appearing inside snake body
+
+  x = flr(rnd(64) / 2) * 2
+  y = flr(rnd(64) / 2) * 2
+
+  add(food, {x, y})
 
   foodlength += 1
 end
