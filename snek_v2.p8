@@ -17,13 +17,15 @@ function _init()
 
     bodylength += 1
   end
+  
+  addfood()
 end
 
 function _update()
   getdirection()
 
   if foodlength == 0 then
-    addfood()
+    -- addfood()
   end
 
   if framecount % 5 == 0 then
@@ -64,17 +66,33 @@ end
 
 function move()
   next = body[1]
-
-  unit = unitsize --* speed
+  currenttail = body[bodylength]
+  newtail = nil
 
   if direction == 0 then
-    next = {next[1] - unit, next[2]}
+    next = {next[1] - unitsize, next[2]}
+
+    if eatfood(next) then
+      newtail = {currenttail[1] - unitsize, currenttail[2]}
+    end
   elseif direction == 1 then
-    next = {next[1] + unit, next[2]}
+    next = {next[1] + unitsize, next[2]}
+
+    if eatfood(next) then
+      newtail = {currenttail[1] + unitsize, currenttail[2]}
+    end
   elseif direction == 2 then
-    next = {next[1], next[2] - unit}
+    next = {next[1], next[2] - unitsize}
+
+    if eatfood(next) then
+      newtail = {currenttail[1], currenttail[2] - unitsize}
+    end
   elseif direction == 3 then
-    next = {next[1], next[2] + unit}
+    next = {next[1], next[2] + unitsize}
+
+    if eatfood(next) then
+      newtail = {currenttail[1], currenttail[2] + unitsize}
+    end
   end
 
   newbody={}
@@ -85,12 +103,17 @@ function move()
     newbody[i] = body[i - 1]
   end
 
+  if newtail != nil then
+    newbody[bodylength + 1] = newtail
+    bodylength += 1
+  end
+
   body = newbody
 end
 
 function wrap(segment)
   for i, coord in pairs(segment) do
-    if coord > 127 then
+    if coord > 64 then
       segment[i] = coord - 64
     elseif coord < 0 then
       segment[i] = coord + 64
@@ -101,10 +124,20 @@ function wrap(segment)
 end
 
 function addfood()
-  -- food[1] = {64, 64}
   add(food, {32, 32})
 
   foodlength += 1
+end
+
+function eatfood(head)
+  if foodlength > 0 and head[1] == food[1][1] and head[2] == food[1][2] then
+    food = {}
+
+    foodlength -= 1
+    return true
+  else
+    return false
+  end
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
