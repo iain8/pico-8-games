@@ -5,6 +5,8 @@ body = {}
 bodylength = 0
 unitsize = 2
 direction = 3
+speed = 0.25
+framecount=0
 
 function _init()
   for i = 1, 5 do
@@ -16,16 +18,23 @@ end
 
 function _update()
   getdirection()
-  move()
+
+  if framecount % 4 == 0 then
+    move()
+  end
+
+  framecount += 1
 end
 
 function _draw()
   rectfill(0,0,128,128,3)
 
+  colour = 15
+
   for part in all(body) do
     x = part[1] * unitsize
     y = part[2] * unitsize
-    rectfill(x, y, x + unitsize, y + unitsize, 4)
+    rectfill(x, y, x + unitsize, y + unitsize, colour)
   end
 
   print(body[1][2], 12, 6, 15)
@@ -42,25 +51,39 @@ end
 function move()
   next = body[1]
 
+  unit = unitsize --* speed
+
   if direction == 0 then
-    next = {next[1] - 1, next[2]}
+    next = {next[1] - unit, next[2]}
   elseif direction == 1 then
-    next = {next[1] + 1, next[2]}
+    next = {next[1] + unit, next[2]}
   elseif direction == 2 then
-    next = {next[1], next[2] - 1}
+    next = {next[1], next[2] - unit}
   elseif direction == 3 then
-    next = {next[1], next[2] + 1}
+    next = {next[1], next[2] + unit}
   end
 
   newbody={}
 
-  newbody[1] = next
+  newbody[1] = wrap(next)
 
   for i = 2, bodylength do
     newbody[i] = body[i - 1]
   end
 
   body = newbody
+end
+
+function wrap(segment)
+  for i, coord in pairs(segment) do
+    if coord > 127 then
+      segment[i] = coord - 64
+    elseif coord < 0 then
+      segment[i] = coord + 64
+    end
+  end
+
+  return segment
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
