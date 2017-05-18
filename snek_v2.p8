@@ -41,6 +41,7 @@ function _draw()
 
   if crash == true then
     print('crashed', 24, 6, 4)
+    stop()
   else
     colour = 9
 
@@ -116,16 +117,8 @@ function move()
 
   body = newbody
 
-  -- test if head occupies body space
-  for i = 2, bodylength do
-    if body[i][1] == body[1][1] and body[i][2] == body[1][2] then
-      crash = true
-
-      return
-    end
-  end
-
-  -- stop()
+  -- if head occupies body then you've failed!
+  crash = inbody(body[1], 2)
 end
 
 function wrap(segment)
@@ -141,10 +134,14 @@ function wrap(segment)
 end
 
 function addfood()
-  -- todo: prevent food appearing inside snake body
-
   x = flr(rnd(64) / 2) * 2
   y = flr(rnd(64) / 2) * 2
+
+  -- if food inside body then reroll position
+  while (inbody({x, y}, 1)) do
+    x = flr(rnd(64) / 2) * 2
+    y = flr(rnd(64) / 2) * 2
+  end
 
   add(food, {x, y})
 
@@ -161,6 +158,16 @@ function eatfood(head)
   else
     return false
   end
+end
+
+function inbody(position, from)
+  for i = from, bodylength do
+    if body[i][1] == position[1] and body[i][2] == position[2] then
+      return true
+    end
+  end
+
+  return false
 end
 __gfx__
 99900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
