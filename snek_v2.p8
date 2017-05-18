@@ -29,7 +29,7 @@ function _update()
     addfood()
   end
 
-  if framecount % 5 == 0 then
+  if framecount % 6 == 0 then
     move()
   end
 
@@ -78,28 +78,16 @@ function move()
 
   if direction == 0 then
     next = {next[1] - unitsize, next[2]}
-
-    if eatfood(next) then
-      newtail = {currenttail[1] - unitsize, currenttail[2]}
-    end
   elseif direction == 1 then
     next = {next[1] + unitsize, next[2]}
-
-    if eatfood(next) then
-      newtail = {currenttail[1] + unitsize, currenttail[2]}
-    end
   elseif direction == 2 then
     next = {next[1], next[2] - unitsize}
-
-    if eatfood(next) then
-      newtail = {currenttail[1], currenttail[2] - unitsize}
-    end
   elseif direction == 3 then
     next = {next[1], next[2] + unitsize}
+  end
 
-    if eatfood(next) then
-      newtail = {currenttail[1], currenttail[2] + unitsize}
-    end
+  if eatfood(next) then
+    newtail = {currenttail[1], currenttail[2]}
   end
 
   newbody={}
