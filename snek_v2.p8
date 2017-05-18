@@ -2,38 +2,38 @@ pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
 body = {}
-bodylength = 0
-unitsize = 2
+body_length = 0
+unit_size = 2
 direction = 2
 speed = 0.25
-framecount = 0
+frame_count = 0
 score = 0
 food = {}
-foodlength = 0
+food_length = 0
 crash = false
 
 function _init()
   for i = 1, 5 do
-    body[i] = {6, i * unitsize}
+    body[i] = {6, i * unit_size}
 
-    bodylength += 1
+    body_length += 1
   end
   
-  addfood()
+  add_food()
 end
 
 function _update()
-  getdirection()
+  get_direction()
 
-  if foodlength == 0 then
-    addfood()
+  if food_length == 0 then
+    add_food()
   end
 
-  if framecount % 6 == 0 then
+  if frame_count % 6 == 0 then
     move()
   end
 
-  framecount += 1
+  frame_count += 1
 end
 
 function _draw()
@@ -46,16 +46,16 @@ function _draw()
     colour = 9
 
     for part in all(body) do
-      local x = part[1] * unitsize
-      local y = part[2] * unitsize
-      rectfill(x, y, x + unitsize, y + unitsize, colour)
+      local x = part[1] * unit_size
+      local y = part[2] * unit_size
+      rectfill(x, y, x + unit_size, y + unit_size, colour)
 
       colour += 1
     end
 
     for tasty in all(food) do
-      local x = tasty[1] * unitsize
-      local y = tasty[2] * unitsize
+      local x = tasty[1] * unit_size
+      local y = tasty[2] * unit_size
       spr(0, x, y)
     end
   end
@@ -63,7 +63,7 @@ function _draw()
   print(score, 12, 6, 10)
 end
 
-function getdirection()
+function get_direction()
   if btn(0) and direction != 1 then direction = 0
   elseif btn(1) and direction != 0 then direction = 1
   elseif btn(2) and direction != 3 then direction = 2
@@ -73,40 +73,40 @@ end
 
 function move()
   local next = body[1]
-  local currenttail = body[bodylength]
-  local newtail = nil
+  local current_tail = body[body_length]
+  local new_tail = nil
 
   if direction == 0 then
-    next = {next[1] - unitsize, next[2]}
+    next = {next[1] - unit_size, next[2]}
   elseif direction == 1 then
-    next = {next[1] + unitsize, next[2]}
+    next = {next[1] + unit_size, next[2]}
   elseif direction == 2 then
-    next = {next[1], next[2] - unitsize}
+    next = {next[1], next[2] - unit_size}
   elseif direction == 3 then
-    next = {next[1], next[2] + unitsize}
+    next = {next[1], next[2] + unit_size}
   end
 
-  if eatfood(next) then
-    newtail = {currenttail[1], currenttail[2]}
+  if eat_food(next) then
+    new_tail = {current_tail[1], current_tail[2]}
   end
 
-  local newbody = {}
+  local new_body = {}
 
-  newbody[1] = wrap(next)
+  new_body[1] = wrap(next)
 
-  for i = 2, bodylength do
-    newbody[i] = body[i - 1]
+  for i = 2, body_length do
+    new_body[i] = body[i - 1]
   end
 
-  if newtail != nil then
-    newbody[bodylength + 1] = newtail
-    bodylength += 1
+  if new_tail != nil then
+    new_body[body_length + 1] = new_tail
+    body_length += 1
   end
 
-  body = newbody
+  body = new_body
 
   -- if head occupies body then you've failed!
-  crash = inbody(body[1], 2)
+  crash = in_body(body[1], 2)
 end
 
 function wrap(segment)
@@ -121,25 +121,25 @@ function wrap(segment)
   return segment
 end
 
-function addfood()
+function add_food()
   local x = flr(rnd(64) / 2) * 2
   local y = flr(rnd(64) / 2) * 2
 
   -- if food inside body then reroll position
-  while (inbody({x, y}, 1)) do
+  while (in_body({x, y}, 1)) do
     x = flr(rnd(64) / 2) * 2
     y = flr(rnd(64) / 2) * 2
   end
 
   add(food, {x, y})
 
-  foodlength += 1
+  food_length += 1
 end
 
-function eatfood(head)
-  if foodlength > 0 and head[1] == food[1][1] and head[2] == food[1][2] then
+function eat_food(head)
+  if food_length > 0 and head[1] == food[1][1] and head[2] == food[1][2] then
     food = {}
-    foodlength -= 1
+    food_length -= 1
     score += 10
 
     return true
@@ -148,8 +148,8 @@ function eatfood(head)
   end
 end
 
-function inbody(position, from)
-  for i = from, bodylength do
+function in_body(position, from)
+  for i = from, body_length do
     if body[i][1] == position[1] and body[i][2] == position[2] then
       return true
     end
