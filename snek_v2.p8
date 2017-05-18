@@ -46,16 +46,16 @@ function _draw()
     colour = 9
 
     for part in all(body) do
-      x = part[1] * unitsize
-      y = part[2] * unitsize
+      local x = part[1] * unitsize
+      local y = part[2] * unitsize
       rectfill(x, y, x + unitsize, y + unitsize, colour)
 
       colour += 1
     end
 
     for tasty in all(food) do
-      x = tasty[1] * unitsize
-      y = tasty[2] * unitsize
+      local x = tasty[1] * unitsize
+      local y = tasty[2] * unitsize
       spr(0, x, y)
     end
   end
@@ -72,9 +72,9 @@ function getdirection()
 end
 
 function move()
-  next = body[1]
-  currenttail = body[bodylength]
-  newtail = nil
+  local next = body[1]
+  local currenttail = body[bodylength]
+  local newtail = nil
 
   if direction == 0 then
     next = {next[1] - unitsize, next[2]}
@@ -90,7 +90,7 @@ function move()
     newtail = {currenttail[1], currenttail[2]}
   end
 
-  newbody={}
+  local newbody = {}
 
   newbody[1] = wrap(next)
 
@@ -122,8 +122,8 @@ function wrap(segment)
 end
 
 function addfood()
-  x = flr(rnd(64) / 2) * 2
-  y = flr(rnd(64) / 2) * 2
+  local x = flr(rnd(64) / 2) * 2
+  local y = flr(rnd(64) / 2) * 2
 
   -- if food inside body then reroll position
   while (inbody({x, y}, 1)) do
