@@ -11,6 +11,7 @@ score = 0
 food = {}
 food_length = 0
 crash = false
+state = 0 -- 0: title, 1: game, 2: game over
 
 function _init()
   for i = 1, 5 do
@@ -23,25 +24,31 @@ function _init()
 end
 
 function _update()
-  get_direction()
+  if state == 1 then
+    get_direction()
 
-  if food_length == 0 then
-    add_food()
+    if food_length == 0 then
+      add_food()
+    end
+
+    if frame_count % 6 == 0 then
+      move()
+    end
+
+    frame_count += 1
+  elseif btn(4) or btn(5) then
+    state = 1
   end
-
-  if frame_count % 6 == 0 then
-    move()
-  end
-
-  frame_count += 1
 end
 
 function _draw()
   rectfill(0,0,128,128,3)
 
-  if crash == true then
+  if state == 2 then
     print('crashed', 24, 6, 4)
     stop()
+  elseif state == 0 then
+    print('welcome to snake', 24, 6, 4)
   else
     colour = 9
 
@@ -106,15 +113,15 @@ function move()
   body = new_body
 
   -- if head occupies body then you've failed!
-  crash = in_body(body[1], 2)
+  if (in_body(body[1], 2)) state = 2
 end
 
 function wrap(segment)
   for i, coord in pairs(segment) do
     if coord > 64 then
-      segment[i] = coord - 64
+      segment[i] = 0 --coord - 64
     elseif coord < 0 then
-      segment[i] = coord + 64
+      segment[i] = 64 --coord + 64
     end
   end
 
