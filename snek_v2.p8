@@ -12,6 +12,8 @@ food = {}
 food_length = 0
 crash = false
 state = 0 -- 0: title, 1: game, 2: game over
+poops = {}
+poop_length = 0
 
 function _init()
   for i = 1, 5 do
@@ -29,6 +31,10 @@ function _update()
 
     if food_length == 0 then
       add_food()
+    end
+
+    if frame_count % 60 == 0 then
+      add_poop()
     end
 
     if frame_count % 6 == 0 then
@@ -64,6 +70,12 @@ function _draw()
       local x = tasty[1] * unit_size
       local y = tasty[2] * unit_size
       spr(0, x, y)
+    end
+
+    for poop in all(poops) do
+      local x = poop[1] * unit_size
+      local y = poop[2] * unit_size
+      spr(1, x, y)
     end
   end
 
@@ -114,6 +126,15 @@ function move()
 
   -- if head occupies body then you've failed!
   if (in_body(body[1], 2)) state = 2
+
+  -- if head occupies poop then you've failed!
+  for poop in all(poops) do
+    if poop[1] == body[1][1] and poop[2] == body[1][2] then
+      state = 2
+
+      return
+    end
+  end
 end
 
 function wrap(segment)
@@ -129,16 +150,7 @@ function wrap(segment)
 end
 
 function add_food()
-  local x = flr(rnd(64) / 2) * 2
-  local y = flr(rnd(64) / 2) * 2
-
-  -- if food inside body then reroll position
-  while (in_body({x, y}, 1)) do
-    x = flr(rnd(64) / 2) * 2
-    y = flr(rnd(64) / 2) * 2
-  end
-
-  add(food, {x, y})
+  add(food, random_position())
 
   food_length += 1
 end
@@ -155,6 +167,27 @@ function eat_food(head)
   end
 end
 
+function add_poop()
+  local tail = body[body_length]
+
+  add(poops, {tail[1], tail[2]})
+
+  poop_length += 1
+end
+
+function random_position()
+  local x = flr(rnd(64) / 2) * 2
+  local y = flr(rnd(64) / 2) * 2
+
+  -- if food inside body then reroll position
+  while (in_body({x, y}, 1)) do
+    x = flr(rnd(64) / 2) * 2
+    y = flr(rnd(64) / 2) * 2
+  end
+
+  return {x, y}
+end
+
 function in_body(position, from)
   for i = from, body_length do
     if body[i][1] == position[1] and body[i][2] == position[2] then
@@ -165,9 +198,9 @@ function in_body(position, from)
   return false
 end
 __gfx__
-99900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-44400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-99900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+99900000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+44400000044400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+99900000444440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
