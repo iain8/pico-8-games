@@ -2,68 +2,123 @@ pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
 body = {}
-bodylength = 0
-unitsize = 2
+body_length = 0
+unit_size = 2
 direction = 2
-speed = 0.25
-framecount = 0
+speed = 6
+frame_count = 0
 score = 0
+hi_score = 0
+orig_hi_score = 0
 food = {}
-foodlength = 0
+food_length = 0
 crash = false
+state = 0 -- 0: title, 1: game, 2: game over
+poops = {}
+poop_length = 0
 
 function _init()
-  for i = 1, 5 do
-    body[i] = {6, i * unitsize}
+  cartdata('this_bad_snake_game_by_iain')
 
-    bodylength += 1
+  orig_hi_score = dget(0)
+
+  if (orig_hi_score) hi_score = orig_hi_score
+
+  setup()
+end
+
+function setup()
+  body = {}
+  body_length = 0
+  food = {}
+  food_length = 0
+  poops = {}
+  poop_length = 0
+  score = 0
+
+  for i = 1, 5 do
+    body[i] = {24, 24 + (i * unit_size)}
+
+    body_length += 1
   end
   
-  addfood()
+  add_food()
 end
 
 function _update()
-  getdirection()
+  if state == 1 then
+    get_direction()
 
-  if foodlength == 0 then
-    addfood()
+    if food_length == 0 then
+      add_food()
+    end
+
+    if frame_count % 60 == 0 then
+      add_poop()
+    end
+
+    if frame_count % speed == 0 then
+      move()
+    end
+
+    if frame_count % 600 == 0 then
+      speed -= 1
+    end
+
+    frame_count += 1
+  elseif btn(0) or btn(1) or btn(2) or btn(3) or btn(4) or btn(5) then
+    setup()
+
+    state = 1
   end
-
-  if framecount % 6 == 0 then
-    move()
-  end
-
-  framecount += 1
 end
 
 function _draw()
   rectfill(0,0,128,128,3)
 
-  if crash == true then
-    print('crashed', 24, 6, 4)
-    stop()
+  if state == 2 then
+    if hi_score > orig_hi_score then
+      dset(0, hi_score)
+      
+      orig_hi_score = hi_score
+    end
+
+    print('game over!', 30, 24, 15)
+    print('press any button', 30, 36, 15)
+    print('to restart', 30, 48, 15)
+  elseif state == 0 then
+    print('welcome to snake-like game', 12, 24, 15)
+    print('press any button', 30, 36, 15)
+    print('to start', 30, 48, 15)
   else
-    colour = 9
+    colour = 0
 
     for part in all(body) do
-      x = part[1] * unitsize
-      y = part[2] * unitsize
-      rectfill(x, y, x + unitsize, y + unitsize, colour)
+      local x = part[1] * unit_size
+      local y = part[2] * unit_size
+      rectfill(x, y, x + unit_size, y + unit_size, (colour % 5) + 8)
 
       colour += 1
     end
 
     for tasty in all(food) do
-      x = tasty[1] * unitsize
-      y = tasty[2] * unitsize
+      local x = tasty[1] * unit_size
+      local y = tasty[2] * unit_size
       spr(0, x, y)
+    end
+
+    for poop in all(poops) do
+      local x = poop[1] * unit_size
+      local y = poop[2] * unit_size
+      spr(1, x, y)
     end
   end
 
-  print(score, 12, 6, 10)
+  print('score ' ..score, 12, 6, 10)
+  print('hi ' ..hi_score, 90, 6, 8)
 end
 
-function getdirection()
+function get_direction()
   if btn(0) and direction != 1 then direction = 0
   elseif btn(1) and direction != 0 then direction = 1
   elseif btn(2) and direction != 3 then direction = 2
@@ -72,75 +127,77 @@ function getdirection()
 end
 
 function move()
-  next = body[1]
-  currenttail = body[bodylength]
-  newtail = nil
+  local next = body[1]
+  local current_tail = body[body_length]
+  local new_tail = nil
 
   if direction == 0 then
-    next = {next[1] - unitsize, next[2]}
+    next = {next[1] - unit_size, next[2]}
   elseif direction == 1 then
-    next = {next[1] + unitsize, next[2]}
+    next = {next[1] + unit_size, next[2]}
   elseif direction == 2 then
-    next = {next[1], next[2] - unitsize}
+    next = {next[1], next[2] - unit_size}
   elseif direction == 3 then
-    next = {next[1], next[2] + unitsize}
+    next = {next[1], next[2] + unit_size}
   end
 
-  if eatfood(next) then
-    newtail = {currenttail[1], currenttail[2]}
+  if eat_food(next) then
+    new_tail = {current_tail[1], current_tail[2]}
   end
 
-  newbody={}
+  local new_body = {}
 
-  newbody[1] = wrap(next)
+  new_body[1] = wrap(next)
 
-  for i = 2, bodylength do
-    newbody[i] = body[i - 1]
+  for i = 2, body_length do
+    new_body[i] = body[i - 1]
   end
 
-  if newtail != nil then
-    newbody[bodylength + 1] = newtail
-    bodylength += 1
+  if new_tail != nil then
+    new_body[body_length + 1] = new_tail
+    body_length += 1
   end
 
-  body = newbody
+  body = new_body
 
   -- if head occupies body then you've failed!
-  crash = inbody(body[1], 2)
+  if (in_body(body[1], 2)) state = 2
+
+  -- if head occupies poop then you've failed!
+  for poop in all(poops) do
+    if poop[1] == body[1][1] and poop[2] == body[1][2] then
+      state = 2
+
+      return
+    end
+  end
 end
 
 function wrap(segment)
   for i, coord in pairs(segment) do
     if coord > 64 then
-      segment[i] = coord - 64
+      segment[i] = 0 --coord - 64
     elseif coord < 0 then
-      segment[i] = coord + 64
+      segment[i] = 64 --coord + 64
     end
   end
 
   return segment
 end
 
-function addfood()
-  x = flr(rnd(64) / 2) * 2
-  y = flr(rnd(64) / 2) * 2
+function add_food()
+  add(food, random_position())
 
-  -- if food inside body then reroll position
-  while (inbody({x, y}, 1)) do
-    x = flr(rnd(64) / 2) * 2
-    y = flr(rnd(64) / 2) * 2
-  end
-
-  add(food, {x, y})
-
-  foodlength += 1
+  food_length += 1
 end
 
-function eatfood(head)
-  if foodlength > 0 and head[1] == food[1][1] and head[2] == food[1][2] then
+function eat_food(head)
+  if food_length > 0 and head[1] == food[1][1] and head[2] == food[1][2] then
     food = {}
-    foodlength -= 1
+    food_length -= 1
     score += 10
+
+    if (score > hi_score) hi_score = score
 
     return true
   else
@@ -148,8 +205,31 @@ function eatfood(head)
   end
 end
 
-function inbody(position, from)
-  for i = from, bodylength do
+function add_poop()
+  local tail = body[body_length]
+
+  add(poops, {tail[1], tail[2]})
+
+  poop_length += 1
+
+  sfx(0)
+end
+
+function random_position()
+  local x = flr(rnd(64) / 2) * 2
+  local y = flr(rnd(64) / 2) * 2
+
+  -- if food inside body then reroll position
+  while (in_body({x, y}, 1) or in_poop({x, y}, 1)) do
+    x = flr(rnd(64) / 2) * 2
+    y = flr(rnd(64) / 2) * 2
+  end
+
+  return {x, y}
+end
+
+function in_body(position, from)
+  for i = from, body_length do
     if body[i][1] == position[1] and body[i][2] == position[2] then
       return true
     end
@@ -157,10 +237,20 @@ function inbody(position, from)
 
   return false
 end
+
+function in_poop(position, from)
+  for i = from, poop_length do
+    if poops[i][1] == position[1] and poops[i][2] == position[2] then
+      return true
+    end
+  end
+
+  return false
+end
 __gfx__
-99900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-44400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-99900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+99900000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+44400000044400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+99900000444440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -324,7 +414,7 @@ __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
-000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00030000062500a2500c2500d2500d2500a2500725000200002000020000200002000020000200002000020000200002000020000200002000020000200002000020000200002000020000200002000020000200
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
