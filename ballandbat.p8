@@ -16,7 +16,7 @@ balldy=1
 ballsize=3
 ballxdir=3
 ballydir=-1 -- -1 = down, +1 = up
-ballacc=0.005
+ballacc=0.01
 
 function _init()
   ballx=rnd(64) + ballsize
@@ -39,7 +39,7 @@ end
 function moveball()
   ballx += ballxdir
 
-  balldy+=ballacc
+  balldy += ballacc
   
   if ballydir==1 then
     bally+=balldy
