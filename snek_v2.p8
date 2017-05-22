@@ -16,8 +16,16 @@ poops = {}
 poop_length = 0
 
 function _init()
+  body = {}
+  body_length = 0
+  food = {}
+  food_length = 0
+  poops = {}
+  poop_length = 0
+  score = 0
+
   for i = 1, 5 do
-    body[i] = {6, i * unit_size}
+    body[i] = {24, 24 + (i * unit_size)}
 
     body_length += 1
   end
@@ -42,7 +50,9 @@ function _update()
     end
 
     frame_count += 1
-  elseif btn(4) or btn(5) then
+  elseif btn(0) or btn(1) or btn(2) or btn(3) or btn(4) or btn(5) then
+    _init()
+
     state = 1
   end
 end
@@ -51,10 +61,13 @@ function _draw()
   rectfill(0,0,128,128,3)
 
   if state == 2 then
-    print('crashed', 24, 6, 4)
-    stop()
+    print('game over!', 30, 24, 15)
+    print('press any button', 30, 36, 15)
+    print('to restart', 30, 48, 15)
   elseif state == 0 then
-    print('welcome to snake', 24, 6, 4)
+    print('welcome to snake', 30, 24, 15)
+    print('press any button', 30, 36, 15)
+    print('to start', 30, 48, 15)
   else
     colour = 9
 
@@ -202,7 +215,7 @@ end
 
 function in_poop(position, from)
   for i = from, poop_length do
-    if poop[i][1] == position[1] and poop[i][2] == position[2] then
+    if poops[i][1] == position[1] and poops[i][2] == position[2] then
       return true
     end
   end
