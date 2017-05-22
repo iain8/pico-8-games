@@ -5,7 +5,7 @@ body = {}
 body_length = 0
 unit_size = 2
 direction = 2
-speed = 0.25
+speed = 6
 frame_count = 0
 score = 0
 food = {}
@@ -45,8 +45,12 @@ function _update()
       add_poop()
     end
 
-    if frame_count % 6 == 0 then
+    if frame_count % speed == 0 then
       move()
+    end
+
+    if frame_count % 600 == 0 then
+      speed -= 1
     end
 
     frame_count += 1
@@ -65,16 +69,16 @@ function _draw()
     print('press any button', 30, 36, 15)
     print('to restart', 30, 48, 15)
   elseif state == 0 then
-    print('welcome to snake', 30, 24, 15)
+    print('welcome to snake-like game', 12, 24, 15)
     print('press any button', 30, 36, 15)
     print('to start', 30, 48, 15)
   else
-    colour = 9
+    colour = 0
 
     for part in all(body) do
       local x = part[1] * unit_size
       local y = part[2] * unit_size
-      rectfill(x, y, x + unit_size, y + unit_size, colour)
+      rectfill(x, y, x + unit_size, y + unit_size, (colour % 5) + 8)
 
       colour += 1
     end
