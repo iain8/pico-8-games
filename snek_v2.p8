@@ -8,6 +8,8 @@ direction = 2
 speed = 6
 frame_count = 0
 score = 0
+hi_score = 0
+orig_hi_score = 0
 food = {}
 food_length = 0
 crash = false
@@ -16,6 +18,16 @@ poops = {}
 poop_length = 0
 
 function _init()
+  cartdata('this_bad_snake_game_by_iain')
+
+  orig_hi_score = dget(0)
+
+  if (orig_hi_score) hi_score = orig_hi_score
+
+  setup()
+end
+
+function setup()
   body = {}
   body_length = 0
   food = {}
@@ -55,7 +67,7 @@ function _update()
 
     frame_count += 1
   elseif btn(0) or btn(1) or btn(2) or btn(3) or btn(4) or btn(5) then
-    _init()
+    setup()
 
     state = 1
   end
@@ -65,6 +77,12 @@ function _draw()
   rectfill(0,0,128,128,3)
 
   if state == 2 then
+    if hi_score > orig_hi_score then
+      dset(0, hi_score)
+      
+      orig_hi_score = hi_score
+    end
+
     print('game over!', 30, 24, 15)
     print('press any button', 30, 36, 15)
     print('to restart', 30, 48, 15)
@@ -96,7 +114,8 @@ function _draw()
     end
   end
 
-  print(score, 12, 6, 10)
+  print('score ' ..score, 12, 6, 10)
+  print('hi ' ..hi_score, 90, 6, 8)
 end
 
 function get_direction()
@@ -177,6 +196,8 @@ function eat_food(head)
     food = {}
     food_length -= 1
     score += 10
+
+    if (score > hi_score) hi_score = score
 
     return true
   else
