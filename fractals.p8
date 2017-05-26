@@ -79,8 +79,10 @@ end
 function title()
   cls()
 
-  print('1 - mandelbrot', 30, 24, 7)
-  print('2 - julia', 30, 36, 7)
+  print('1 - mandelbrot', 6, 24, 7)
+  print('2 - julia', 6, 36, 7)
+  print('up and down to zoom sometimes', 6, 60, 7)
+  print('left to return to menu', 6, 72, 7)
 end
 
 function _update()
