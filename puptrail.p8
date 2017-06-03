@@ -1,46 +1,62 @@
 pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
-dog = {}
-dog.x = 64
-dog.y = 64
-dog.sprite = 0
-dog.timer = 1
-dog.flip = false
+dogs = {}
+dogs_length = 0
 frame = 0
 sound = 0
 
+function _init()
+  add_dog(64, 64)
+  add_dog(84, 64)
+end
+
+function add_dog(x, y)
+  local dog = {}
+  dog.x = x
+  dog.y = y
+  dog.sprite = 0
+  dog.timer = 1
+  dog.flip = false
+
+  dogs_length += 1
+
+  dogs[dogs_length] = dog
+end
+
 function _update()
-  if btn(0) then
-    dog.x -= 1
-    dog.sprite += 1
-    dog.flip = false
-    if (dog.sprite > 3) dog.sprite = 1
-  elseif btn(1) then
-    dog.x += 1
-    dog.sprite += 1
-    dog.flip = true
-    if (dog.sprite > 3) dog.sprite = 1
-  elseif btn(2) then
-    if dog.sprite < 4 then
-      dog.sprite = 4
-    else
+  for dog in all(dogs) do
+    if btn(0) then
+      dog.x -= 1
       dog.sprite += 1
-    end
-
-    if (dog.sprite > 6) dog.sprite = 4
-    dog.flip = false
-    dog.y -= 1
-  elseif btn(3) then
-    if dog.sprite < 16 then
-      dog.sprite = 16
-    else
+      dog.flip = false
+      if (dog.sprite > 3) dog.sprite = 1
+    elseif btn(1) then
+      dog.x += 1
       dog.sprite += 1
-    end
+      dog.flip = true
+      if (dog.sprite > 3) dog.sprite = 1
+    elseif btn(2) then
+      if dog.sprite < 4 then
+        dog.sprite = 4
+      else
+        dog.sprite += 1
+      end
 
-    if (dog.sprite > 18) dog.sprite = 16
-    dog.flip = false
-    dog.y += 1
+      if (dog.sprite > 6) dog.sprite = 4
+      dog.flip = false
+      dog.y -= 1
+    elseif btn(3) then
+      if dog.sprite < 16 then
+        dog.sprite = 16
+      else
+        dog.sprite += 1
+      end
+
+      if (dog.sprite > 18) dog.sprite = 16
+      dog.flip = false
+      dog.y += 1
+    end
   end
 
   if (btn(0) or btn(1) or btn(2) or btn(3)) and frame % 3 == 0 then
@@ -48,13 +64,16 @@ function _update()
 
     if sound == 0 then sound = 1 else sound = 0 end
   end
-
+  
   frame += 1
 end
 
 function _draw()
   cls()
-  spr(dog.sprite * 2, dog.x, dog.y, 2, 2, dog.flip)
+
+  for dog in all(dogs) do
+    spr(dog.sprite * 2, dog.x, dog.y, 2, 2, dog.flip)
+  end
 end
 __gfx__
 00770077000000000077007700000000007700770000000000770077000000000000000660000000000000066000000000000006600000000000000000000000
