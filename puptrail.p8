@@ -25,46 +25,48 @@ function add_dog(x, y)
 end
 
 function _update()
-  for dog in all(dogs) do
-    if btn(0) then
-      dog.x -= 1
-      dog.sprite += 1
-      dog.flip = false
-      if (dog.sprite > 3) dog.sprite = 1
-    elseif btn(1) then
-      dog.x += 1
-      dog.sprite += 1
-      dog.flip = true
-      if (dog.sprite > 3) dog.sprite = 1
-    elseif btn(2) then
-      if dog.sprite < 4 then
-        dog.sprite = 4
-      else
+  if frame % 3 == 0 then
+    for dog in all(dogs) do
+      if btn(0) then
+        dog.x -= 2
         dog.sprite += 1
-      end
-
-      if (dog.sprite > 6) dog.sprite = 4
-      dog.flip = false
-      dog.y -= 1
-    elseif btn(3) then
-      if dog.sprite < 16 then
-        dog.sprite = 16
-      else
+        dog.flip = false
+        if (dog.sprite > 3) dog.sprite = 1
+      elseif btn(1) then
+        dog.x += 2
         dog.sprite += 1
-      end
+        dog.flip = true
+        if (dog.sprite > 3) dog.sprite = 1
+      elseif btn(2) then
+        if dog.sprite < 4 then
+          dog.sprite = 4
+        else
+          dog.sprite += 1
+        end
 
-      if (dog.sprite > 18) dog.sprite = 16
-      dog.flip = false
-      dog.y += 1
+        if (dog.sprite > 6) dog.sprite = 4
+        dog.flip = false
+        dog.y -= 2
+      elseif btn(3) then
+        if dog.sprite < 16 then
+          dog.sprite = 16
+        else
+          dog.sprite += 1
+        end
+
+        if (dog.sprite > 18) dog.sprite = 16
+        dog.flip = false
+        dog.y += 2
+      end
+    end
+
+    if (btn(0) or btn(1) or btn(2) or btn(3)) then
+      sfx(sound)
+
+      if sound == 0 then sound = 1 else sound = 0 end
     end
   end
 
-  if (btn(0) or btn(1) or btn(2) or btn(3)) and frame % 3 == 0 then
-    sfx(sound)
-
-    if sound == 0 then sound = 1 else sound = 0 end
-  end
-  
   frame += 1
 end
 
