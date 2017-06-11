@@ -1,20 +1,99 @@
 pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
+body = {}
+body_length = 0
 dogs = {}
 dogs_length = 0
 frame = 0
 sound = 0
+speed = 10
+direction = 0
+unit_size = 20
 
 function _init()
-  add_dog(64, 64)
-  add_dog(84, 64)
+  dogs = {}
+  
+  add_dog()
+  add_dog()
+  add_dog()
+
+  dogs_length += 3
+  
+  body[1] = {24, 24 + (1 * unit_size)}
+  body[2] = {24, 24 + (2 * unit_size)}
+  body[3] = {24, 24 + (3 * unit_size)}
+
+  body_length += 3
 end
 
-function add_dog(x, y)
+function _update()
+  get_direction()
+
+  if frame % speed == 0 then
+    move()
+  end
+
+  if frame % 3 == 0 then
+    for dog in all(dogs) do
+      if direction == 0 then
+        dog.sprite += 1
+        dog.flip = false
+        if (dog.sprite > 3) dog.sprite = 1
+      elseif direction == 1 then
+        dog.sprite += 1
+        dog.flip = true
+        if (dog.sprite > 3) dog.sprite = 1
+      elseif direction == 2 then
+        if dog.sprite < 4 then
+          dog.sprite = 4
+        else
+          dog.sprite += 1
+        end
+
+        if (dog.sprite > 6) dog.sprite = 4
+        dog.flip = false
+      elseif direction == 3 then
+        if dog.sprite < 16 then
+          dog.sprite = 16
+        else
+          dog.sprite += 1
+        end
+
+        if (dog.sprite > 18) dog.sprite = 16
+        dog.flip = false
+      end
+    end
+
+    sfx(sound)
+
+    if sound == 0 then sound = 1 else sound = 0 end
+  end
+
+  frame += 1
+end
+
+function _draw()
+  cls()
+
+  local dog = 1
+
+  for part in all(body) do
+    local x = part[1]
+    local y = part[2]
+
+    spr(dogs[dog].sprite * 2, x, y, 2, 2, dogs[dog].flip)
+
+    dog += 1
+  end
+
+  -- for dog in all(dogs) do
+    -- spr(dog.sprite * 2, dog.x, dog.y, 2, 2, dog.flip)
+  -- end
+end
+
+function add_dog()
   local dog = {}
-  dog.x = x
-  dog.y = y
   dog.sprite = 0
   dog.timer = 1
   dog.flip = false
@@ -24,58 +103,71 @@ function add_dog(x, y)
   dogs[dogs_length] = dog
 end
 
-function _update()
-  if frame % 3 == 0 then
-    for dog in all(dogs) do
-      if btn(0) then
-        dog.x -= 2
-        dog.sprite += 1
-        dog.flip = false
-        if (dog.sprite > 3) dog.sprite = 1
-      elseif btn(1) then
-        dog.x += 2
-        dog.sprite += 1
-        dog.flip = true
-        if (dog.sprite > 3) dog.sprite = 1
-      elseif btn(2) then
-        if dog.sprite < 4 then
-          dog.sprite = 4
-        else
-          dog.sprite += 1
-        end
-
-        if (dog.sprite > 6) dog.sprite = 4
-        dog.flip = false
-        dog.y -= 2
-      elseif btn(3) then
-        if dog.sprite < 16 then
-          dog.sprite = 16
-        else
-          dog.sprite += 1
-        end
-
-        if (dog.sprite > 18) dog.sprite = 16
-        dog.flip = false
-        dog.y += 2
-      end
-    end
-
-    if (btn(0) or btn(1) or btn(2) or btn(3)) then
-      sfx(sound)
-
-      if sound == 0 then sound = 1 else sound = 0 end
-    end
+function get_direction()
+  if btn(0) and direction != 1 then direction = 0
+  elseif btn(1) and direction != 0 then direction = 1
+  elseif btn(2) and direction != 3 then direction = 2
+  elseif btn(3) and direction != 2 then direction = 3
   end
-
-  frame += 1
 end
 
-function _draw()
-  cls()
+function move()
+  local next = body[1]
+  local current_tail = body[body_length]
+  local new_tail = nil
 
-  for dog in all(dogs) do
-    spr(dog.sprite * 2, dog.x, dog.y, 2, 2, dog.flip)
+  if direction == 0 then
+    next = {next[1] - unit_size, next[2]}
+  elseif direction == 1 then
+    next = {next[1] + unit_size, next[2]}
+  elseif direction == 2 then
+    next = {next[1], next[2] - unit_size}
+  elseif direction == 3 then
+    next = {next[1], next[2] + unit_size}
   end
+
+  -- if eat_food(next) then
+  --   new_tail = {current_tail[1], current_tail[2]}
+  -- end
+
+  local new_body = {}
+
+  new_body[1] = wrap(next)
+
+  for i = 2, body_length do
+    new_body[i] = body[i - 1]
+  end
+
+  if new_tail != nil then
+    new_body[body_length + 1] = new_tail
+    body_length += 1
+  end
+
+  body = new_body
+
+  -- if head occupies body then you've failed!
+  -- if (in_body(body[1], 2)) state = 2
+
+  -- if head occupies poop then you've failed!
+  -- for poop in all(poops) do
+  --   if poop[1] == body[1][1] and poop[2] == body[1][2] then
+  --     state = 2
+
+  --     return
+  --   end
+  -- end
+end
+
+function wrap(segment)
+  for i, coord in pairs(segment) do
+    if coord > 128 then
+      segment[i] = 0 --coord - 64
+    elseif coord < 0 then
+      segment[i] = 128 --coord + 64
+    end
+  end
+
+  return segment
 end
 __gfx__
 00770077000000000077007700000000007700770000000000770077000000000000000660000000000000066000000000000006600000000000000000000000
