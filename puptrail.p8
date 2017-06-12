@@ -19,12 +19,8 @@ function _init()
   dogs = {}
   
   add_dog()
-  -- add_dog()
-  -- add_dog()
   
-  body[1] = {24, 24 + (1 * unit_size)}
-  -- body[2] = {24, 24 + (2 * unit_size)}
-  -- body[3] = {24, 24 + (3 * unit_size)}
+  body[1] = {24, 24 + (1 * unit_size), 0}
 
   body_length += 1
 
@@ -44,16 +40,18 @@ function _update()
   end
 
   if frame % 3 == 0 then
+    local index = 1
+
     for dog in all(dogs) do
-      if direction == 0 then
+      if body[index][3] == 0 then
         dog.sprite += 1
         dog.flip = false
         if (dog.sprite > 3) dog.sprite = 1
-      elseif direction == 1 then
+      elseif body[index][3] == 1 then
         dog.sprite += 1
         dog.flip = true
         if (dog.sprite > 3) dog.sprite = 1
-      elseif direction == 2 then
+      elseif body[index][3] == 2 then
         if dog.sprite < 4 then
           dog.sprite = 4
         else
@@ -62,7 +60,7 @@ function _update()
 
         if (dog.sprite > 6) dog.sprite = 4
         dog.flip = false
-      elseif direction == 3 then
+      elseif body[index][3] == 3 then
         if dog.sprite < 16 then
           dog.sprite = 16
         else
@@ -72,6 +70,8 @@ function _update()
         if (dog.sprite > 18) dog.sprite = 16
         dog.flip = false
       end
+
+      index += 1
     end
 
     sfx(sound)
@@ -111,23 +111,18 @@ function _draw()
   draw_bounding(food[1][1] + 4, food[1][2] + 4, unit_size / 2, 11)
 end
 
-function draw_grid()
-  for x = 0, 127, unit_size do
-    for y = 0, 127, unit_size do
-      print(x .."," ..y, x, y)
-    end
-  end
-end
-
+-- draw a bounding box
 function draw_bounding(x, y, width, col)
   rect(x, y, x + width, y + width, col)
 end
 
+-- add a new dog! TODO: set colour here
 function add_dog()
   local dog = {}
   dog.sprite = 0
   dog.timer = 1
   dog.flip = false
+  dog.direction = 0
 
   dogs_length += 1
 
@@ -148,13 +143,13 @@ function move()
   local new_tail = nil
 
   if direction == 0 then
-    next = {next[1] - unit_size, next[2]}
+    next = {next[1] - unit_size, next[2], direction}
   elseif direction == 1 then
-    next = {next[1] + unit_size, next[2]}
+    next = {next[1] + unit_size, next[2], direction}
   elseif direction == 2 then
-    next = {next[1], next[2] - unit_size}
+    next = {next[1], next[2] - unit_size, direction}
   elseif direction == 3 then
-    next = {next[1], next[2] + unit_size}
+    next = {next[1], next[2] + unit_size, direction}
   end
 
   local new_body = {}
