@@ -13,12 +13,15 @@ speed = 10
 direction = 0
 unit_size = 16
 dog_size = 16 --20
+DEBUG = false
+dog_colours = {7, 8, 9, 10, 11, 12}
+dog_colours_length = 6
 
 -- set up dogs
 function _init()
   dogs = {}
   
-  add_dog()
+  add_dog(7)
   
   body[1] = {24, 24 + (1 * unit_size), 0}
 
@@ -86,29 +89,32 @@ function _draw()
   cls()
 
   local dog = 1
-  local colour = 0
 
   for part in all(body) do
     local x = part[1]
     local y = part[2]
 
-    pal(7, (colour % 5) + 8);
+    pal(7, dogs[dog].colour);
 
     spr(dogs[dog].sprite * 2, x, y, 2, 2, dogs[dog].flip)
 
+    pal()
+
     dog += 1
-    colour += 1
   end
 
-  pal()
+  if DEBUG then draw_bounding(body[1][1], body[1][2], unit_size, 8) end
 
-  draw_bounding(body[1][1], body[1][2], unit_size, 8)
+  for stray in all(strays) do
+    print(stray[3], 12, 6, 10)
+    pal(7, stray[3]);
 
-  for tasty in all(strays) do
-    spr(38, tasty[1], tasty[2], 2, 2)
+    spr(38, stray[1], stray[2], 2, 2)
+
+    pal()
   end
 
-  draw_bounding(strays[1][1] + 4, strays[1][2] + 4, unit_size / 2, 11)
+  if DEBUG then draw_bounding(strays[1][1] + 4, strays[1][2] + 4, unit_size / 2, 11) end
 end
 
 -- draw a bounding box
@@ -117,12 +123,13 @@ function draw_bounding(x, y, width, col)
 end
 
 -- add a new dog! TODO: set colour here
-function add_dog()
+function add_dog(colour)
   local dog = {}
   dog.sprite = 0
   dog.timer = 1
   dog.flip = false
   dog.direction = 0
+  dog.colour = colour
 
   dogs_length += 1
 
@@ -156,10 +163,12 @@ function move()
 
   new_body[1] = wrap(next)
 
-  if eat_strays(new_body[1]) then
+  local met_stray = meet_stray(new_body[1])
+
+  if met_stray then
     new_tail = {current_tail[1], current_tail[2]}
 
-    add_dog()
+    add_dog(met_stray)
   end
 
   for i = 2, body_length do
@@ -199,7 +208,10 @@ function wrap(segment)
 end
 
 function add_strays()
-  add(strays, random_position())
+  local stray = random_position()
+  stray[3] = dog_colours[flr(rnd(dog_colours_length)) + 1]
+
+  add(strays, stray)
 
   strays_length += 1
 end
@@ -227,15 +239,17 @@ function in_body(position, from)
   return false
 end
 
-function eat_strays(head)
-  if strays_length > 0 and overlaps(head[1], head[2], strays[1][1] + 4, strays[1][2] + 4) then
+function meet_stray(head)
+  local stray = strays[1]
+
+  if strays_length > 0 and overlaps(head[1], head[2], stray[1] + 4, stray[2] + 4) then
     strays = {}
     strays_length -= 1
     -- score += 10
 
     -- if (score > hi_score) hi_score = score
 
-    return true
+    return stray[3]
   else
     return false
   end
