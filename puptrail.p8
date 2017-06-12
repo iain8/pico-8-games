@@ -12,21 +12,21 @@ sound = 0
 speed = 10
 direction = 0
 unit_size = 16
-dog_size = 20
+dog_size = 16 --20
 
 -- set up dogs
 function _init()
   dogs = {}
   
   add_dog()
-  add_dog()
-  add_dog()
+  -- add_dog()
+  -- add_dog()
   
   body[1] = {24, 24 + (1 * unit_size)}
-  body[2] = {24, 24 + (2 * unit_size)}
-  body[3] = {24, 24 + (3 * unit_size)}
+  -- body[2] = {24, 24 + (2 * unit_size)}
+  -- body[3] = {24, 24 + (3 * unit_size)}
 
-  body_length += 3
+  body_length += 1
 
   food = {}
   food_length = 0
@@ -96,9 +96,13 @@ function _draw()
     dog += 1
   end
 
+  draw_bounding(body[1][1], body[1][2], 8)
+
   for tasty in all(food) do
     spr(64, tasty[1], tasty[2], 2, 2)
   end
+
+  draw_bounding(food[1][1], food[1][2], 11)
 end
 
 function draw_grid()
@@ -107,6 +111,10 @@ function draw_grid()
       print(x .."," ..y, x, y)
     end
   end
+end
+
+function draw_bounding(x, y, col)
+  rect(x, y, x + unit_size, y + unit_size, col)
 end
 
 function add_dog()
@@ -143,15 +151,15 @@ function move()
     next = {next[1], next[2] + unit_size}
   end
 
-  if eat_food(next) then
+  local new_body = {}
+
+  new_body[1] = wrap(next)
+
+  if eat_food(new_body[1]) then
     new_tail = {current_tail[1], current_tail[2]}
 
     add_dog()
   end
-
-  local new_body = {}
-
-  new_body[1] = wrap(next)
 
   for i = 2, body_length do
     new_body[i] = body[i - 1]
@@ -219,7 +227,7 @@ function in_body(position, from)
 end
 
 function eat_food(head)
-  if food_length > 0 and head[1] == food[1][1] and head[2] == food[1][2] then
+  if food_length > 0 and overlaps(head[1], head[2], food[1][1], food[1][2]) then
     food = {}
     food_length -= 1
     -- score += 10
@@ -229,6 +237,19 @@ function eat_food(head)
     return true
   else
     return false
+  end
+end
+
+function overlaps(first_x, first_y, second_x, second_y)
+  local first_x2 = first_x + unit_size
+  local first_y2 = first_y + unit_size
+  local second_x2 = second_x + unit_size
+  local second_y2 = second_y + unit_size
+
+  if (first_x > second_x2 or second_x > first_x2 or second_y > first_y2 or first_y > second_y2) then
+    return false
+  else
+    return true
   end
 end
 __gfx__
