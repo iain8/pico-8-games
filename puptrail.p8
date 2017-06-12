@@ -96,13 +96,13 @@ function _draw()
     dog += 1
   end
 
-  draw_bounding(body[1][1], body[1][2], 8)
+  draw_bounding(body[1][1], body[1][2], unit_size, 8)
 
   for tasty in all(food) do
     spr(64, tasty[1], tasty[2], 2, 2)
   end
 
-  draw_bounding(food[1][1], food[1][2], 11)
+  draw_bounding(food[1][1] + 4, food[1][2] + 4, unit_size / 2, 11)
 end
 
 function draw_grid()
@@ -113,8 +113,8 @@ function draw_grid()
   end
 end
 
-function draw_bounding(x, y, col)
-  rect(x, y, x + unit_size, y + unit_size, col)
+function draw_bounding(x, y, width, col)
+  rect(x, y, x + width, y + width, col)
 end
 
 function add_dog()
@@ -227,7 +227,7 @@ function in_body(position, from)
 end
 
 function eat_food(head)
-  if food_length > 0 and overlaps(head[1], head[2], food[1][1], food[1][2]) then
+  if food_length > 0 and overlaps(head[1], head[2], food[1][1] + 4, food[1][2] + 4) then
     food = {}
     food_length -= 1
     -- score += 10
@@ -243,8 +243,8 @@ end
 function overlaps(first_x, first_y, second_x, second_y)
   local first_x2 = first_x + unit_size
   local first_y2 = first_y + unit_size
-  local second_x2 = second_x + unit_size
-  local second_y2 = second_y + unit_size
+  local second_x2 = second_x + unit_size / 2
+  local second_y2 = second_y + unit_size / 2
 
   if (first_x > second_x2 or second_x > first_x2 or second_y > first_y2 or first_y > second_y2) then
     return false
