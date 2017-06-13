@@ -7,6 +7,8 @@ dogs = {}
 dogs_length = 0
 strays = {}
 strays_length = 0
+food = {}
+food_length = 0
 frame = 0
 sound = 0
 speed = 10
@@ -16,6 +18,8 @@ dog_size = 16 --20
 DEBUG = false
 dog_colours = {7, 8, 9, 10, 11, 12}
 dog_colours_length = 6
+score = 0
+hi_score = 0
 
 -- set up dogs
 function _init()
@@ -29,6 +33,9 @@ function _init()
 
   strays = {}
   strays_length = 0
+
+  food = {}
+  food_length = 0
 end
 
 function _update()
@@ -38,8 +45,12 @@ function _update()
     move()
   end
 
-  if strays_length == 0 then
+  if strays_length == 0 and flr(rnd(20)) == 2 then
     add_strays()
+  end
+
+  if food_length == 0 flr(rnd(30)) == 2 then
+    add_food()
   end
 
   if frame % 3 == 0 then
@@ -106,7 +117,6 @@ function _draw()
   if DEBUG then draw_bounding(body[1][1], body[1][2], unit_size, 8) end
 
   for stray in all(strays) do
-    print(stray[3], 12, 6, 10)
     pal(7, stray[3]);
 
     spr(38, stray[1], stray[2], 2, 2)
@@ -114,7 +124,14 @@ function _draw()
     pal()
   end
 
+  for bone in all(food) do
+    spr(64, bone[1], bone[2], 2, 2)
+  end
+
   if DEBUG then draw_bounding(strays[1][1] + 4, strays[1][2] + 4, unit_size / 2, 11) end
+
+  print('score ' ..score, 12, 6, 10)
+  print('hi ' ..hi_score, 90, 6, 8)
 end
 
 -- draw a bounding box
@@ -122,7 +139,7 @@ function draw_bounding(x, y, width, col)
   rect(x, y, x + width, y + width, col)
 end
 
--- add a new dog! TODO: set colour here
+-- add a new dog!
 function add_dog(colour)
   local dog = {}
   dog.sprite = 0
@@ -163,10 +180,16 @@ function move()
 
   new_body[1] = wrap(next)
 
+  if eat_food(new_body[1]) then
+    score_up(20)
+  end
+
   local met_stray = meet_stray(new_body[1])
 
   if met_stray then
     new_tail = {current_tail[1], current_tail[2]}
+
+    sfx(2)
 
     add_dog(met_stray)
   end
@@ -216,6 +239,12 @@ function add_strays()
   strays_length += 1
 end
 
+function add_food()
+  add(food, random_position())
+
+  food_length += 1
+end
+
 function random_position()
   local x = flr(rnd(64) / 2) * 2
   local y = flr(rnd(64) / 2) * 2
@@ -245,11 +274,29 @@ function meet_stray(head)
   if strays_length > 0 and overlaps(head[1], head[2], stray[1] + 4, stray[2] + 4) then
     strays = {}
     strays_length -= 1
-    -- score += 10
-
-    -- if (score > hi_score) hi_score = score
+    
+    score_up(10)
 
     return stray[3]
+  else
+    return false
+  end
+end
+
+function eat_food(head)
+  if food_length > 0 then
+    local bone = food[1]
+
+    if overlaps(head[1], head[2], bone[1] + 4, bone[2] + 4) then
+      food = {}
+      food_length -= 1
+      
+      score_up(10)
+
+      return true
+    else
+      return false
+    end
   else
     return false
   end
@@ -266,6 +313,12 @@ function overlaps(first_x, first_y, second_x, second_y)
   else
     return true
   end
+end
+
+function score_up(points)
+  score += points
+
+  if (score > hi_score) hi_score = score
 end
 __gfx__
 00770077000000000077007700000000007700770000000000770077000000000000000660000000000000066000000000000006600000000000000000000000
@@ -436,7 +489,7 @@ __map__
 __sfx__
 00010000250503b0003c0003b0003c0003b0003c0003b000002000020000200002000020000200002000020000200002000020000200002000020000200002000020000200002000020000200002000020000200
 000100002105000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000800002d15032150361500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
