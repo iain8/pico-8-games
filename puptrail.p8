@@ -20,7 +20,7 @@ dog_colours = {7, 8, 9, 10, 11, 12}
 dog_colours_length = 6
 score = 0
 hi_score = 0
-state = 1 -- 0: menu 1: game 2: fail 3: end
+state = 0 -- 0: menu 1: game 2: fail 3: end
 shake_start = 0
 
 -- set up dogs
@@ -43,7 +43,13 @@ end
 function _update()
   frame += 1
 
-  if (state == 2 or state == 3) return
+  if state == 0 then
+    if (btn(0) or btn(1) or btn(2) or btn(3) or btn(4) or btn(5)) state = 1
+
+    return
+  elseif state != 1 then
+    return
+  end
 
   get_direction()
 
@@ -100,6 +106,7 @@ function _update()
   end
 end
 
+-- set beige as transparent instead of black
 function set_transparency()
   palt(15, true)
   palt(0, false)
@@ -107,6 +114,20 @@ end
 
 function _draw()
   rectfill(0, 0, 128, 128, 3)
+
+  if state == 0 then
+    rectfill(3, 43, 124, 83, 7)
+    rectfill(5, 46, 122, 81, 13)
+    line(5, 45, 122, 45, 6) 
+    line(3, 84, 124, 84, 6)
+
+    print('dog time', 49, 51, 5)
+    print('dog time', 48, 50, 7)
+
+    print('press any button to start', 15, 65, 7)
+
+    return
+  end
 
   local dog = 1
 
@@ -145,7 +166,9 @@ function _draw()
 
   if debug then draw_bounding(strays[1][1] + 4, strays[1][2] + 4, unit_size / 2, 11) end
 
+  print('score ' ..score, 13, 7, 5)
   print('score ' ..score, 12, 6, 10)
+  print('hi ' ..hi_score, 91, 7, 5)
   print('hi ' ..hi_score, 90, 6, 8)
 
   -- shake!
