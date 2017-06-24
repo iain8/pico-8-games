@@ -14,7 +14,7 @@ sound = 0
 speed = 10
 direction = 0
 unit_size = 16
-dog_size = 16 --20
+dog_size = 16
 debug = false
 dog_colours = {7, 8, 9, 10, 11, 12}
 dog_colours_length = 6
@@ -26,6 +26,11 @@ shake_start = 0
 -- set up dogs
 function _init()
   dogs = {}
+  dogs_length = 0
+  body = {}
+  body_length = 0
+  speed = 10
+  score = 0
   
   add_dog(7)
   
@@ -44,7 +49,13 @@ function _update()
   frame += 1
 
   if state == 0 then
-    if (btn(0) or btn(1) or btn(2) or btn(3) or btn(4) or btn(5)) state = 1
+    if (any_button()) state = 1
+
+    return
+  elseif state == 3 and any_button() then
+    state = 1
+
+    _init()
 
     return
   elseif state != 1 then
@@ -106,6 +117,10 @@ function _update()
   end
 end
 
+function any_button()
+  return btn(0) or btn(1) or btn(2) or btn(3) or btn(4) or btn(5)
+end
+
 -- set beige as transparent instead of black
 function set_transparency()
   palt(15, true)
@@ -116,11 +131,6 @@ function _draw()
   rectfill(0, 0, 128, 128, 3)
 
   if state == 0 then
-    rectfill(3, 43, 124, 83, 7)
-    rectfill(5, 46, 122, 81, 13)
-    line(5, 45, 122, 45, 6) 
-    line(3, 84, 124, 84, 6)
-
     print('dog time', 49, 51, 5)
     print('dog time', 48, 50, 7)
 
@@ -179,11 +189,15 @@ function _draw()
       draw_dialog()
       print('dog collision!', 40, 50, 8)
     else
-      camera(0, 0)
-
-      draw_dialog()
-      print('game over', 44, 50, 8)
+      state = 3
     end
+  elseif state == 3 then
+    camera(0, 0)
+
+    draw_dialog()
+
+    print('game over', 44, 50, 8)
+    print('press any button to restart', 10, 65, 7)
   end
 end
 
@@ -193,10 +207,10 @@ function draw_bounding(x, y, width, col)
 end
 
 function draw_dialog()
-  rectfill(3, 43, 124, 63, 7)
-  rectfill(5, 46, 122, 61, 1)
+  rectfill(3, 43, 124, 83, 7)
+  rectfill(5, 46, 122, 81, 13)
   line(5, 45, 122, 45, 6) 
-  line(3, 64, 124, 64, 6)
+  line(3, 84, 124, 84, 6)
 end
 
 -- add a new dog!
@@ -415,8 +429,8 @@ ff777077707777ffff777077707777ffff777077707777fff77777779777766fffffffffffffffff
 ff777700077777ffff777700077777ffff777700077777ff770070079997766fffffffffffffffff7777077777777776ff777700077777ffffffffffffffffff
 ff777070707777ffff777070707777ffff777070707777ff777000777777766fffffffffffffffff777000777777777fff777770777777ffffffffffffffffff
 ff777700077777ffff777700077777ffff777700077777ff777707777777777fffffffffffffffff777ee7077777777fff777700077777ffffffffffffffffff
-ff7777ee777777ffff7777ee777777ffff7777ee777777ff777000777777777ffffffffffffffffff77ee7777777777fff7770ee707777ffffffffffffffffff
-ff7777ee777777ffff7777ee777777ffff7777ee777777ff777777777777777fffffffffffffffffff7777777777777fff7777ee777777ffffffffffffffffff
+ff7777ee777777ffff77777ee77777ffff7777ee777777ff777000777777777ffffffffffffffffff77ee7777777777fff7770ee707777ffffffffffffffffff
+ff7777ee777777ffff77777ee77777ffff7777ee777777ff777777777777777fffffffffffffffffff7777777777777fff7777ee777777ffffffffffffffffff
 fff7777777777ffffff7777777777ffffff7777777777ffff77777777777777fffffffffffffffffff777777776f777ffff7777777777fffffffffffffffffff
 ffff77ffff77ffffffff77ffff77ffffffff77ffff77ffffff7777777f7777ffffffffffffffffffff77f77ff66f77ffffff77ffff77ffffffffffffffffffff
 ffff77ffff77fffffffff7ffff77ffffffff77ffff7fffffff77ff77ff7777ffffffffffffffffffff77f77ff66f77ffffff77ffff77ffffffffffffffffffff
