@@ -9,13 +9,14 @@ strays = {}
 strays_length = 0
 food = {}
 food_length = 0
+food_box = {4, 8}
 frame = 0
 sound = 0
 speed = 10
 direction = 0
 unit_size = 16
 dog_size = 16
-debug = false
+debug = true
 dog_colours = {7, 8, 9, 10, 11, 12}
 dog_colours_length = 6
 score = 0
@@ -156,7 +157,9 @@ function _draw()
     dog += 1
   end
 
-  if debug then draw_bounding(body[1][1], body[1][2], unit_size, 8) end
+  if debug then 
+    draw_bounding(body[1][1] + 2, body[1][2] + 2, unit_size - 4, unit_size - 4, 8) 
+  end
 
   for stray in all(strays) do
     pal(7, stray[3]);
@@ -174,7 +177,13 @@ function _draw()
     spr(64, bone[1], bone[2], 2, 2)
   end
 
-  if debug then draw_bounding(strays[1][1] + 4, strays[1][2] + 4, unit_size / 2, 11) end
+  if debug and food_length > 0 then 
+    draw_bounding(food[1][1], food[1][2] + 4, unit_size, unit_size / 2, 12)
+  end
+
+  if debug and strays_length > 0 then 
+    draw_bounding(strays[1][1], strays[1][2], unit_size, unit_size, 11)
+  end
 
   print('score ' ..score, 13, 7, 5)
   print('score ' ..score, 12, 6, 10)
@@ -202,8 +211,8 @@ function _draw()
 end
 
 -- draw a bounding box
-function draw_bounding(x, y, width, col)
-  rect(x, y, x + width, y + width, col)
+function draw_bounding(x, y, width, height, col)
+  rect(x, y, x + width, y + height, col)
 end
 
 function draw_dialog()
@@ -336,10 +345,10 @@ function random_position()
   return {x, y}
 end
 
--- if a position overlaps any part of the body TODO: not working right
+-- if a position overlaps any part of the body
 function in_body(position, from)
   for i = from, body_length do
-    if overlaps(body[i][1], body[i][2], position[1], position[2]) then
+    if overlaps(body[i][1], body[i][2], position[1] + 1, position[2] + 1, unit_size - 2, unit_size - 2) then
       return true
     end
   end
@@ -351,7 +360,7 @@ end
 function meet_stray(head)
   local stray = strays[1]
 
-  if strays_length > 0 and overlaps(head[1], head[2], stray[1] + 4, stray[2] + 4) then
+  if strays_length > 0 and overlaps(head[1], head[2], stray[1], stray[2], unit_size, unit_size) then
     strays = {}
     strays_length -= 1
     
@@ -368,7 +377,7 @@ function eat_food(head)
   if food_length > 0 then
     local bone = food[1]
 
-    if overlaps(head[1], head[2], bone[1] + 4, bone[2] + 4) then
+    if overlaps(head[1], head[2], bone[1], bone[2] + 4, unit_size, unit_size / 2) then
       food = {}
       food_length -= 1
       
@@ -384,11 +393,11 @@ function eat_food(head)
 end
 
 -- determine if two things are overlapping
-function overlaps(first_x, first_y, second_x, second_y)
-  local first_x2 = first_x + unit_size / 2
-  local first_y2 = first_y + unit_size / 2
-  local second_x2 = second_x + unit_size / 2
-  local second_y2 = second_y + unit_size / 2
+function overlaps(first_x, first_y, second_x, second_y, width, height)
+  local first_x2 = first_x + width
+  local first_y2 = first_y + height
+  local second_x2 = second_x + width
+  local second_y2 = second_y + height
 
   if (first_x > second_x2 or second_x > first_x2 or second_y > first_y2 or first_y > second_y2) then
     return false
