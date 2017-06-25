@@ -16,13 +16,14 @@ speed = 10
 direction = 0
 unit_size = 16
 dog_size = 16
-debug = true
+debug = false
 dog_colours = {7, 8, 9, 10, 11, 12}
 dog_colours_length = 6
 score = 0
 hi_score = 0
 state = 0 -- 0: menu 1: game 2: fail 3: end
 shake_start = 0
+movement_frame = false
 
 -- set up dogs
 function _init()
@@ -32,6 +33,7 @@ function _init()
   body_length = 0
   speed = 10
   score = 0
+  movement_frame = false
   
   add_dog(7)
   
@@ -49,6 +51,8 @@ end
 function _update()
   frame += 1
 
+  movement_frame = frame % (flr(speed) + 1) == 0
+
   if state == 0 then
     if (any_button()) state = 1
 
@@ -65,7 +69,7 @@ function _update()
 
   get_direction()
 
-  if frame % speed == 0 then
+  if movement_frame then
     move()
   end
 
@@ -77,7 +81,7 @@ function _update()
     add_food()
   end
 
-  if frame % 3 == 0 then
+  if movement_frame then
     local index = 1
 
     for dog in all(dogs) do
@@ -268,7 +272,7 @@ function move()
 
     score_up(20)
 
-    speed -= 1
+    speed -= 0.5
   end
 
   local met_stray = meet_stray(new_body[1])
