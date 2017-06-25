@@ -335,13 +335,13 @@ function add_food()
   food_length += 1
 end
 
--- generate a random position outside of the body TODO: and food
+-- generate a random position outside of the body
 function random_position()
   local x = flr(rnd(64) / 2) * 2
   local y = flr(rnd(64) / 2) * 2
 
   -- if strays inside body then reroll position
-  while in_body({x, y}, 1) do
+  while in_body({x, y}, 1) or eat_food({x, y}, true) do
     x = flr(rnd(64) / 2) * 2
     y = flr(rnd(64) / 2) * 2
   end
@@ -377,15 +377,17 @@ function meet_stray(head)
 end
 
 -- consume food if head dog has reached it
-function eat_food(head)
+function eat_food(head, test)
   if food_length > 0 then
     local bone = food[1]
 
     if overlaps(head[1], head[2], bone[1], bone[2] + 4, unit_size, unit_size / 2) then
-      food = {}
-      food_length -= 1
+      if not test then
+        food = {}
+        food_length -= 1
       
-      score_up(10)
+        score_up(10)
+      end
 
       return true
     else
@@ -412,7 +414,7 @@ end
 
 -- update score and high score
 function score_up(points)
-  score += points
+  score += points * body_length
 
   if (score > hi_score) hi_score = score
 end
@@ -440,9 +442,9 @@ fff7777777777ffffff7777777777ffffff7777777777fffff77ff77ff9f966fffffffffffffffff
 ff777077707777ffff777077707777ffff777077707777fff77777777977999fffffffffffffffff7007770077777766ff777777777777ffffffffffffffffff
 ff777077707777ffff777077707777ffff777077707777fff77777779777766fffffffffffffffff7770007777777776ff770077700777ffffffffffffffffff
 ff777700077777ffff777700077777ffff777700077777ff770070079997766fffffffffffffffff7777077777777776ff777700077777ffffffffffffffffff
-ff777070707777ffff777070707777ffff777070707777ff777000777777766fffffffffffffffff777000777777777fff777770777777ffffffffffffffffff
-ff777700077777ffff777700077777ffff777700077777ff777707777777777fffffffffffffffff777ee7077777777fff777700077777ffffffffffffffffff
-ff7777ee777777ffff77777ee77777ffff7777ee777777ff777000777777777ffffffffffffffffff77ee7777777777fff7770ee707777ffffffffffffffffff
+ff777070707777ffff777070707777ffff777070707777ff777777777777766fffffffffffffffff777000777777777fff777770777777ffffffffffffffffff
+ff777700077777ffff777700077777ffff777700077777ff777000777777777fffffffffffffffff777ee7077777777fff777700077777ffffffffffffffffff
+ff7777ee777777ffff77777ee77777ffff7777ee777777ff777707777777777ffffffffffffffffff77ee7777777777fff7770ee707777ffffffffffffffffff
 ff7777ee777777ffff77777ee77777ffff7777ee777777ff777777777777777fffffffffffffffffff7777777777777fff7777ee777777ffffffffffffffffff
 fff7777777777ffffff7777777777ffffff7777777777ffff77777777777777fffffffffffffffffff777777776f777ffff7777777777fffffffffffffffffff
 ffff77ffff77ffffffff77ffff77ffffffff77ffff77ffffff7777777f7777ffffffffffffffffffff77f77ff66f77ffffff77ffff77ffffffffffffffffffff
